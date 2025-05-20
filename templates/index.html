@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Contrato HolaWifi</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { background: #0074D9; color: white; padding: 10px; }
+    label { display: block; margin-top: 10px; }
+    input, select, textarea { width: 100%; padding: 5px; margin-top: 5px; }
+    .bloque { margin-bottom: 20px; }
+  </style>
+</head>
+
+  
+<body>
+
+  <h2>Datos del Titular del Contrato</h2>
+  <form action="/generar_pdf" method="POST">
+    <div class="bloque">
+      <label>Nombre Completo:</label>
+      <input type="text" name="nombre_completo" required>
+
+      <label>DNI/NIE:</label>
+      <input type="text" name="dni" required>
+
+      <label>Teléfono:</label>
+      <input type="tel" name="telefono" required>
+
+      <label>Correo Electrónico:</label>
+      <input type="email" name="email" required>
+
+      <label>Dirección:</label>
+      <input type="text" name="direccion" required>
+
+      <label>Población:</label>
+      <input type="text" name="poblacion" required>
+
+      <label>CP:</label>
+      <input type="text" name="cp" required>
+
+      <label>Provincia:</label>
+      <input type="text" name="provincia" required>
+
+      <label>Tipo de Cliente:</label>
+      <select name="tipo_cliente">
+        <option value="Propietario">Propietario</option>
+        <option value="Inquilino">Inquilino</option>
+      </select>
+    </div>
+
+    <h2>Detalles de Contratación</h2>
+    <div class="bloque">
+      <label>Tarifa Contratada:</label>
+      <select name="tarifa">
+        <option>Traslado Fibra</option>
+        <option>Traslado Fibra Air</option>
+        <option>Wimax 40</option>
+        <option>Fibra Air</option>
+        <option>Fibra Air+</option>
+        <option>Megafibra 100</option>
+        <option>Megafibra 300</option>
+      </select>
+
+      <label>Periodicidad:</label>
+      <select name="periodicidad">
+        <option>Mensual</option>
+        <option>Anual</option>
+      </select>
+
+      <label>Precio:</label>
+      <input type="text" name="precio">
+
+      <label>Alta:</label>
+      <select name="alta">
+        <option>Mensual</option>
+        <option>Anual Renovable</option>
+      </select>
+
+      <label>Equipos en Préstamo:</label>
+      <select name="equipo">
+        <option>AC</option>
+        <option>LTU</option>
+        <option>WAVE</option>
+      </select>
+
+      <label>Modelo:</label>
+      <input type="text" name="modelo">
+
+      <label>Cobertura Total:</label>
+      <select name="cobertura">
+        <option>No Requiere</option>
+        <option>Sí Requiere y Acepta</option>
+        <option>Sí Requiere y No Acepta</option>
+      </select>
+
+      <label>SSID:</label>
+      <input type="text" name="ssid">
+
+      <label>Total a Pagar en la Instalación (con IVA):</label>
+      <input type="text" name="total_instalacion">
+
+      <label>Forma de Pago:</label>
+      <select name="forma_pago">
+        <option>Efectivo</option>
+        <option>Tarjeta</option>
+        <option>Otro</option>
+      </select>
+
+      <label>El Cliente Paga al Instalador:</label>
+      <input type="text" name="pago_instalador">
+
+      <label>Método de Pago:</label>
+      <select name="metodo_pago_instalador">
+        <option>Efectivo</option>
+        <option>Tarjeta</option>
+        <option>Otro</option>
+      </select>
+
+      <label>Observaciones:</label>
+      <textarea name="observaciones"></textarea>
+    </div>
+
+    <h2>Orden de Domiciliación SEPA</h2>
+    <div class="bloque">
+      <label>IBAN:</label>
+      <input type="text" name="iban" maxlength="34" placeholder="ESXX XXXX XXXX XXXX XXXX XXXX">
+    </div>
+    
+    <h2>Firma del Cliente</h2>
+    <div class="bloque">
+      <canvas id="canvasFirma" width="800" height="200" style="border:1px solid #000;"></canvas>
+
+      <button type="button" onclick="borrarFirma()">Borrar Firma</button>
+      <input type="hidden" name="firma" id="firma">
+    </div>
+    
+    <button type="submit">Generar Contrato PDF</button>
+  </form>
+  <script>
+    const canvas = document.getElementById('canvasFirma');
+    const ctx = canvas.getContext('2d');
+  
+    // Mejora del trazo
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+  
+    let firmando = false;
+  
+    canvas.addEventListener('mousedown', e => {
+    firmando = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+});
+
+canvas.addEventListener('mousemove', e => {
+    if (firmando) {
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+});
+
+  
+    canvas.addEventListener('mouseup', () => {
+        firmando = false;
+        document.getElementById('firma').value = canvas.toDataURL();
+    });
+  
+    canvas.addEventListener('mouseleave', () => {
+        firmando = false;
+    });
+    function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+    function borrarFirma() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('firma').value = "";
+    }
+  
+    function validarFirma() {
+        if (!document.getElementById('firma').value) {
+            alert("Por favor, firme antes de enviar el contrato.");
+            return false;
+        }
+        return true;
+    }
+  </script>
+  
+  
+</body>
+</html>
