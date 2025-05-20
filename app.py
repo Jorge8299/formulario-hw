@@ -4,6 +4,8 @@ from fpdf import FPDF
 import os
 import base64
 from io import BytesIO
+from flask import Flask, render_template, request, send_file, redirect, url_for
+
 
 app = Flask(__name__)
 @app.route('/')
@@ -150,7 +152,12 @@ def generar_pdf():
     ruta = os.path.join("contratos", "contrato_holawifi.pdf")
     pdf.output(ruta)
 
-    return send_file(ruta, as_attachment=True)
+    return redirect(url_for('ver_pdf'))
+@app.route('/ver_pdf')
+def ver_pdf():
+    return send_file("contratos/contrato_holawifi.pdf", mimetype='application/pdf')
+
+
 if __name__ == '__main__':
    port = int(os.environ.get("PORT", 5000))
    app.run(host="0.0.0.0", port=port)
