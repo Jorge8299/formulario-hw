@@ -145,61 +145,85 @@
     <button type="submit">Generar Contrato PDF</button>
   </form>
   <script>
-    const canvas = document.getElementById('canvasFirma');
-    const ctx = canvas.getContext('2d');
-  
-    // Mejora del trazo
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-  
-    let firmando = false;
-  
-    canvas.addEventListener('mousedown', e => {
-    firmando = true;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-});
+  const canvas = document.getElementById('canvasFirma');
+  const ctx = canvas.getContext('2d');
 
-canvas.addEventListener('mousemove', e => {
-    if (firmando) {
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-    }
-});
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#000";
 
-  
-    canvas.addEventListener('mouseup', () => {
-        firmando = false;
-        document.getElementById('firma').value = canvas.toDataURL();
-    });
-  
-    canvas.addEventListener('mouseleave', () => {
-        firmando = false;
-    });
-    function getPos(e) {
+  let firmando = false;
+
+  function getPosMouse(e) {
     const rect = canvas.getBoundingClientRect();
     return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
     };
-}
+  }
 
-    function borrarFirma() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('firma').value = "";
+  function getPosTouch(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }
+
+  // Ratón
+  canvas.addEventListener('mousedown', e => {
+    firmando = true;
+    const pos = getPosMouse(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (firmando) {
+      const pos = getPosMouse(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
     }
-  
-    function validarFirma() {
-        if (!document.getElementById('firma').value) {
-            alert("Por favor, firme antes de enviar el contrato.");
-            return false;
-        }
-        return true;
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    firmando = false;
+    document.getElementById('firma').value = canvas.toDataURL();
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    firmando = false;
+  });
+
+  // Táctil
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault(); // Evita el scroll mientras firmas
+    firmando = true;
+    const pos = getPosTouch(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  });
+
+  canvas.addEventListener('touchmove', e => {
+    if (firmando) {
+      const pos = getPosTouch(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
     }
-  </script>
+  });
+
+  canvas.addEventListener('touchend', () => {
+    firmando = false;
+    document.getElementById('firma').value = canvas.toDataURL();
+  });
+
+  function borrarFirma() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('firma').value = "";
+  }
+</script>
+
   <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/static/sw.js')
