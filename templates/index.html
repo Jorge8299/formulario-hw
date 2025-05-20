@@ -19,6 +19,8 @@
 
   
 <body>
+  <button id="instalarBtn" style="display:none;">Instalar esta app</button>
+
 
   <h2>Datos del Titular del Contrato</h2>
   <form action="/generar_pdf" method="POST">
@@ -204,6 +206,29 @@ canvas.addEventListener('mousemove', e => {
       .then(() => console.log('Service Worker registrado'));
   }
 </script>
+<script>
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('instalarBtn');
+    btn.style.display = 'inline-block';
+    btn.addEventListener('click', () => {
+      btn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuario aceptó instalar la app');
+        } else {
+          console.log('Usuario rechazó instalar la app');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+</script>
+
 
   
 </body>
