@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Contrato HolaWifi</title>
+  <link rel="manifest" href="/static/manifest.json">
+
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h2 { background: #0074D9; color: white; padding: 10px; }
@@ -10,6 +12,9 @@
     input, select, textarea { width: 100%; padding: 5px; margin-top: 5px; }
     .bloque { margin-bottom: 20px; }
   </style>
+  
+<meta name="theme-color" content="#0074D9">
+
 </head>
 
   
@@ -193,7 +198,13 @@ canvas.addEventListener('mousemove', e => {
         return true;
     }
   </script>
-  
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/sw.js')
+      .then(() => console.log('Service Worker registrado'));
+  }
+</script>
+
   
 </body>
 </html>
